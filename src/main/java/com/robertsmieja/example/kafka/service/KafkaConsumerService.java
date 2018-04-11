@@ -51,7 +51,7 @@ public class KafkaConsumerService {
        return kafkaService.getKafkaConsumer().beginningOffsets(Collections.singleton(new TopicPartition(topic, partition)));
     }
 
-    @ShellMethod
+    @ShellMethod("Seek to a given offset for a Topic/Partition")
     void seek(
             @ShellOption(defaultValue = "test")String topic,
             @ShellOption(defaultValue = "0") int partition,
