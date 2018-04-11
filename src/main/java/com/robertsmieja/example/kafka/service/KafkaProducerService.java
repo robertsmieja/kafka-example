@@ -1,10 +1,13 @@
 package com.robertsmieja.example.kafka.service;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.stereotype.Service;
 
@@ -12,24 +15,25 @@ import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+@RequiredArgsConstructor
 @Service
 @ShellComponent
 public class KafkaProducerService {
-    KafkaProducer<String, String> kafkaProducer;
-    String topic = "test";
+    private final KafkaConfigService kafkaConfigService;
 
-    public KafkaProducerService() {
-        Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("acks", "all");
-        props.put("retries", 0);
-        props.put("batch.size", 2000);
-        props.put("linger.ms", 1);
-        props.put("buffer.memory", 33554432);
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+    private KafkaProducer<String, String> kafkaProducer;
+    private String topic = "test";
 
-        kafkaProducer = new KafkaProducer<>(props);
+    @ShellMethodAvailability
+    public Availability availabilityCheck() {
+        Properties configuration = kafkaConfigService.getConfiguration();
+        if (configuration != null) {
+            kafkaProducer = new KafkaProducer<>(configuration);
+            return Availability.available();
+        }
+        else {
+            return Availability.unavailable("Not configured");
+        }
     }
 
     @ShellMethod("Get current Kafka topic")
