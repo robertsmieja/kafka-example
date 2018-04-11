@@ -19,16 +19,14 @@ import java.util.concurrent.Future;
 @Service
 @ShellComponent
 public class KafkaProducerService {
-    private final KafkaConfigService kafkaConfigService;
+    private final KafkaService kafkaService;
 
-    private KafkaProducer<String, String> kafkaProducer;
     private String topic = "test";
 
     @ShellMethodAvailability
     public Availability availabilityCheck() {
-        Properties configuration = kafkaConfigService.getConfiguration();
+        Properties configuration = kafkaService.getConfiguration();
         if (configuration != null) {
-            kafkaProducer = new KafkaProducer<>(configuration);
             return Availability.available();
         }
         else {
@@ -49,7 +47,7 @@ public class KafkaProducerService {
     @ShellMethod("Send message to current Kafka topic")
     RecordMetadata send(@ShellOption(defaultValue = "foo") String key, @ShellOption(defaultValue = "bar") String value) throws ExecutionException, InterruptedException {
         ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, value);
-        Future<RecordMetadata> metadataFuture = kafkaProducer.send(record);
+        Future<RecordMetadata> metadataFuture = kafkaService.getKafkaProducer().send(record);
         return metadataFuture.get();
     }
 }

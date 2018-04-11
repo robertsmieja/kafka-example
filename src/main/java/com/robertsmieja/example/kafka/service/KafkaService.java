@@ -1,7 +1,9 @@
 package com.robertsmieja.example.kafka.service;
 
 
+import lombok.Getter;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -11,8 +13,12 @@ import java.util.Properties;
 
 @Service
 @ShellComponent
-public class KafkaConfigService {
+public class KafkaService {
     private Properties props;
+    @Getter
+    private KafkaConsumer<String, String> kafkaConsumer;
+    @Getter
+    private KafkaProducer<String, String> kafkaProducer;
 
     @ShellMethod("Configure Kafka")
     Properties configure(
@@ -40,6 +46,10 @@ public class KafkaConfigService {
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         this.props = props;
+
+        kafkaConsumer = new KafkaConsumer<>(props);
+        kafkaProducer = new KafkaProducer<>(props);
+
         return this.props;
     }
 
@@ -47,4 +57,6 @@ public class KafkaConfigService {
     Properties getConfiguration(){
         return this.props;
     }
+
+
 }
